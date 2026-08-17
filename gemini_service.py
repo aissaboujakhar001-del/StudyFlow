@@ -2,14 +2,17 @@ import logging
 from google import genai
 from google.genai import types
 
+# إعداد نظام الـ Logging للمطور فقط
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-MAX_TEXT_LENGTH = 15000
+MAX_TEXT_LENGTH = 15000  # حد أقصى للحماية من التجاوز
 
 def process_study_request(api_key: str, text: str, task_mode: str, target_lang: str, academic_level: str):
+    # 1. التحقق من طول النص المدخل
     if len(text) > MAX_TEXT_LENGTH:
         return False, f"⚠️ النص المدخل طويل جداً (يتجاوز {MAX_TEXT_LENGTH} حرف). يرجى تقليصه."
 
+    # 2. القاموس المخصص لكل نمط دراسي
     prompts_map = {
         "📝 ملخص شامل + 3 أسئلة اختيار من متعدد": (
             "قم بإعداد ملخص هيكلي شديد التركيز للنص واستخرج أهم المفاهيم. "
@@ -38,13 +41,16 @@ def process_study_request(api_key: str, text: str, task_mode: str, target_lang: 
 
     تعليمات صارمة:
     1. صغ جميع المخرجات بالكامل باللغة المحدد ({target_lang}).
-    2. استخدم تنسيق Markdown احترافي وجداول منظم عند الحاجة.
+    2. استخدم تنسيق Markdown احترافي وجداول منظمة عند الحاجة.
     """
 
     try:
         logging.info(f"إرسال طلب جديد - النمط: {task_mode} | اللغة: {target_lang}")
+        
+        # الاتصال بالعميل باستخدام المفتاح الآمن
         client = genai.Client(api_key=api_key)
 
+        # التوليد باستخدام نموذج Gemini 2.5 Flash المعتمد والمدعوم بمفتاحك
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=f"النص الأصلي للدرس:\n---\n{text}\n---",
@@ -54,11 +60,14 @@ def process_study_request(api_key: str, text: str, task_mode: str, target_lang: 
             )
         )
 
+        # التحقق من وجود استجابة صحيحة
         if response and response.text:
             return True, response.text
         else:
             return False, "⚠️ لم يتم استلام استجابة صالحة من النموذج. يرجى إعادة المحاولة."
 
     except Exception as exc:
+        # تسجيل التفاصيل التقنية في الـ Log للمطور وعدم عرضها للمستخدم النهائي
         logging.error(f"خطأ في API: {str(exc)}")
-        return False, "❌ تعذر الاتصال بمركز معالجة البيانات حالياً. يرجى التحقق من الشبكة أو المحاولة لاحقاً."
+        return False, "❌ تعذر الاتصال بمركز معالجة البيانات حالياً. يرجى التحقق من المفتاح أو حالة الشبكة."
+
