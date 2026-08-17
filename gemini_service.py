@@ -52,7 +52,7 @@ def process_study_request(api_key: str, text: str, task_mode: str, target_lang: 
 
         # التوليد باستخدام نموذج Gemini 2.5 Flash المعتمد والمدعوم بمفتاحك
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=f"النص الأصلي للدرس:\n---\n{text}\n---",
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
