@@ -1,2 +1,7 @@
 streamlit
 google-genai
+streamlit-option-menu
+pypdf
+python-docx
+fpdf2
+
