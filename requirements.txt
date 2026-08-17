@@ -1,7 +1,5 @@
 streamlit
-google-genai
-streamlit-option-menu
+groq
 pypdf
 python-docx
-fpdf2
 
